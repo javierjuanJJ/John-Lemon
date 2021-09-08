@@ -2,16 +2,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameEnding : MonoBehaviour
 {
     public float fadeDuration = 1f;
     public GameObject player;
     bool m_IsPlayerAtExit;
-    
+    bool m_IsPlayerCaught;
     public Canvas CanvasFather;
+    public Canvas CanvasFatherLose;
     
     public CanvasGroup exitBackgroundImageCanvasGroup;
+    public CanvasGroup caughtBackgroundImageCanvasGroup;
     float m_Timer;
     public float displayImageDuration = 1f;
 
@@ -22,22 +25,36 @@ public class GameEnding : MonoBehaviour
 
     private void Update()
     {
-        if (m_IsPlayerAtExit)
+        if (m_IsPlayerAtExit || m_IsPlayerCaught)
         {
-            EndLevel();
+            EndLevel(m_IsPlayerAtExit ? exitBackgroundImageCanvasGroup : caughtBackgroundImageCanvasGroup , m_IsPlayerAtExit);
         }
     }
     
-    void EndLevel ()
+    void EndLevel(CanvasGroup imageCanvasGroup, bool doRestart)
     {
         m_Timer += Time.deltaTime;
-        exitBackgroundImageCanvasGroup.alpha = m_Timer / fadeDuration;
+        imageCanvasGroup.alpha = m_Timer / fadeDuration;
         
         if(m_Timer > fadeDuration + displayImageDuration)
         {
-            Application.Quit();
+            if (doRestart)
+            {
+                SceneManager.LoadScene (0);
+            }
+            else
+            {
+                Application.Quit ();
+            }
         }
         
+    }
+    
+    public void CaughtPlayer ()
+    {
+        CanvasFatherLose.gameObject.SetActive(true);
+        Debug.Log("Enter victorious");
+        m_IsPlayerCaught = true;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -45,7 +62,7 @@ public class GameEnding : MonoBehaviour
         if (other.CompareTag(player.tag))
         {
             CanvasFather.gameObject.SetActive(true);
-            Debug.Log("Enter");
+            Debug.Log("Enter victorious");
             m_IsPlayerAtExit = true;
         }
     }
