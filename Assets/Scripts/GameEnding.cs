@@ -7,17 +7,16 @@ using UnityEngine.SceneManagement;
 public class GameEnding : MonoBehaviour
 {
     public float fadeDuration = 1f;
-    public GameObject player;
-    bool m_IsPlayerAtExit;
-    bool m_IsPlayerCaught;
-    public Canvas CanvasFather;
-    public Canvas CanvasFatherLose;
-    
-    public CanvasGroup exitBackgroundImageCanvasGroup;
-    public CanvasGroup caughtBackgroundImageCanvasGroup;
-    float m_Timer;
     public float displayImageDuration = 1f;
+    
+    public GameObject player;
+    bool m_IsPlayerAtExit,m_IsPlayerCaught,m_HasAudioPlayed;
+    public Canvas CanvasFather, CanvasFatherLose;
 
+    public CanvasGroup exitBackgroundImageCanvasGroup, caughtBackgroundImageCanvasGroup;
+    float m_Timer;
+    public AudioSource exitAudio, caughtAudio;
+    
     private void Start()
     {
         CanvasFather.gameObject.SetActive(false);
@@ -27,12 +26,19 @@ public class GameEnding : MonoBehaviour
     {
         if (m_IsPlayerAtExit || m_IsPlayerCaught)
         {
-            EndLevel(m_IsPlayerAtExit ? exitBackgroundImageCanvasGroup : caughtBackgroundImageCanvasGroup , m_IsPlayerAtExit);
+            EndLevel(m_IsPlayerAtExit ? exitBackgroundImageCanvasGroup : caughtBackgroundImageCanvasGroup , m_IsPlayerAtExit,m_IsPlayerAtExit ? exitAudio : caughtAudio);
         }
     }
     
-    void EndLevel(CanvasGroup imageCanvasGroup, bool doRestart)
+    void EndLevel(CanvasGroup imageCanvasGroup, bool doRestart, AudioSource audioSource)
     {
+        
+        if (!m_HasAudioPlayed)
+        {
+            audioSource.Play();
+            m_HasAudioPlayed = true;
+        }
+        
         m_Timer += Time.deltaTime;
         imageCanvasGroup.alpha = m_Timer / fadeDuration;
         
@@ -53,7 +59,7 @@ public class GameEnding : MonoBehaviour
     public void CaughtPlayer ()
     {
         CanvasFatherLose.gameObject.SetActive(true);
-        Debug.Log("Enter victorious");
+        Debug.Log("Enter lose");
         m_IsPlayerCaught = true;
     }
 
